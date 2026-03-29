@@ -53,6 +53,7 @@ namespace TerminalDesktopMod
             {
                 if (StaticCamera is null)
                     CreateStaticCamera();
+                StaticCamera.gameObject.SetActive(true);
                 TerminalDesktopManager.Instance.CanvasDesktop.worldCamera = StaticEventUICamera;
                 StaticCamera.depth = 50;
                 PreviousLocalVisorStatus = player.localVisor.GetChild(0).gameObject.activeSelf;
@@ -65,6 +66,7 @@ namespace TerminalDesktopMod
                 StaticCamera.depth = -20;
                 if (DynamicEventUICamera is null)
                     CreateDynamicEventCamera();
+                StaticCamera.gameObject.SetActive(false);
                 TerminalDesktopManager.Instance.CanvasDesktop.worldCamera = DynamicEventUICamera;
                 player.localVisor.GetChild(0).gameObject.SetActive(PreviousLocalVisorStatus);
                 player.isClimbingLadder = true; // free camera
@@ -79,6 +81,7 @@ namespace TerminalDesktopMod
             {
                 StaticCamera.depth = -20;
                 player.localVisor.GetChild(0).gameObject.SetActive(PreviousLocalVisorStatus);
+                StaticCamera.gameObject.SetActive(false);
             }
             player.isClimbingLadder = false;
             player.ladderCameraHorizontal = 0; // set camera horizontal to center monitor
@@ -118,6 +121,7 @@ namespace TerminalDesktopMod
             StaticCamera.clearFlags = CameraClearFlags.Depth;
             StaticCamera.fieldOfView = 58;
             StaticEventUICamera.fieldOfView = StaticCamera.fieldOfView - 2;
+            eventUICameraObj.SetActive(false);
             ReferencesStorage.Terminal.playerScreenTexHighRes.width = StaticCamera.pixelWidth;
             ReferencesStorage.Terminal.playerScreenTexHighRes.height = StaticCamera.pixelHeight;
             GameNetworkManager.Instance.localPlayerController.playerBodyAnimator.gameObject.SetActive(false);

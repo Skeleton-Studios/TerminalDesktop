@@ -15,75 +15,78 @@ namespace TerminalDesktopMod
     [BepInDependency("atomic.terminalapi")]
     public class Main : BaseUnityPlugin
     {
-        public const string ModGUID = "wijes.desktop.terminal";
+        public const string ModGUID = "ss.desktop.terminal";
         public const string ModName = "Terminal Desktop";
-        public const string ModVersion = "0.6.0";
+        public const string ModVersion = "1.0.1";
         internal static ManualLogSource Log;
         private readonly Harmony harmony = new Harmony(ModGUID);
+        private AssetBundle bundle;
 
         private void Awake()
         {
             Log = Logger;
             Logger.LogInfo($"Plugin Terminal Desktop is loading! v {ModVersion}");
-            var path = $"{Paths.PluginPath}/wijes-TerminalDesktop-{ModVersion}/terminaldesktop.bundle";
-            if (!Directory.Exists($"{Paths.PluginPath}/wijes-TerminalDesktop-{ModVersion}"))
-                path = $"{Paths.PluginPath}/wijes-TerminalDesktop/terminaldesktop.bundle";
-            AssetBundle assetBundle = AssetBundle.LoadFromFile(path);
-            LoadFlashItem(assetBundle);
+            LoadAssetBundle();
+
+            LoadFlashItem();
             
-            var desktopPrefab = assetBundle.LoadAsset<GameObject>("Desktop");
+            var desktopPrefab = LoadAsset<GameObject>("desktop.prefab");
             GenerateRpc(desktopPrefab);
             DesktopStorage.DesktopPrefab = desktopPrefab;
             
-            LoadUsbPortObject(assetBundle);
-            LoadDesktopIcons(assetBundle);
-            LoadDesktopWindows(assetBundle);
+            LoadUsbPortObject();
+            LoadDesktopIcons();
+            LoadDesktopWindows();
             harmony.PatchAll();
 
             GenerateTerminalCommand();
             Logger.LogInfo($"Plugin Terminal Desktop is loaded! v {ModVersion}");
         }
 
-        private void LoadFlashItem(AssetBundle assetBundle)
+        private void LoadAssetBundle()
         {
-            var flashItem = assetBundle.LoadAsset<Item>("FlashDrive");
+            string baseDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            string fullPath = Path.Combine(baseDir, "terminaldesktop");
+            if (!File.Exists(fullPath))
+            {
+                throw new FileNotFoundException($"Asset bundle not found at path: {fullPath}");
+            }
+            bundle = AssetBundle.LoadFromFile(fullPath);
+            if(!bundle)
+            {
+                throw new System.Exception("Failed to load AssetBundle from path: " + fullPath);
+            }
+        }
+
+        private T LoadAsset<T>(string assetPath) where T : UnityEngine.Object
+        {
+            if(bundle is null)
+            {
+                throw new System.Exception("AssetBundle is not loaded. Cannot load asset.");
+            }
+
+            string root = "assets/terminaldesktop/";
+
+            return bundle.LoadAsset<T>(root + assetPath);
+        }
+
+        private void LoadFlashItem()
+        {
+            var flashItem = LoadAsset<Item>("items/flashdrive.asset");
             DesktopStorage.FlashDriveItem = flashItem;
-            Renderer rend = flashItem.spawnPrefab.GetComponent<Renderer>();
-            var texture = assetBundle.LoadAsset<Texture2D>("FlashDriveAlbedo");
-            rend.material = new Material(Shader.Find("HDRP/Lit"));
-            rend.tag = "PhysicsProp";
-            rend.material.mainTexture = texture;
             DesktopStorage.SpawnableScraps.Add(flashItem);
         }
 
-        private void LoadUsbPortObject(AssetBundle assetBundle)
+        private void LoadUsbPortObject()
         {
-            var usbPortObject = assetBundle.LoadAsset<GameObject>("UsbPort");
-            var rends = usbPortObject.GetComponentsInChildren<Renderer>();
-            foreach (var rend in rends)
-            {
-                var listMat = new List<Material>();
-                for (int i = 0; i < rend.materials.Count(); i++)
-                {
-                    var color = rend.materials[i].color;
-                    var texture = rend.materials[i].mainTexture;
-                    var mat = new Material(Shader.Find("HDRP/Lit"));
-                    mat.mainTexture = texture;
-                    mat.color = color;
-                    listMat.Add(mat);
-                }
-
-                rend.SetMaterials(listMat);
-                rend.tag = "InteractTrigger";
-                rend.gameObject.layer = LayerMask.NameToLayer("InteractableObject");
-            }
+            var usbPortObject = LoadAsset<GameObject>("usbport.prefab");
             DesktopStorage.UsbFlashPort = usbPortObject;
             GenerateRpc(usbPortObject);
         }
 
-        private void LoadDesktopIcons(AssetBundle assetBundle)
+        private void LoadDesktopIcons()
         {
-            var icons = assetBundle.LoadAllAssets<GameObject>()
+            var icons = bundle.LoadAllAssets<GameObject>()
                 .Where(x => x.GetComponent<DesktopIconBase>());
             foreach (var icon in icons)
             {
@@ -92,9 +95,9 @@ namespace TerminalDesktopMod
                     DesktopStorage.AddIcon(desktopIcon);
             }
         }
-        private void LoadDesktopWindows(AssetBundle assetBundle)
+        private void LoadDesktopWindows()
         {
-            var windows = assetBundle.LoadAllAssets<GameObject>()
+            var windows = bundle.LoadAllAssets<GameObject>()
                 .Where(x => x.GetComponent<DesktopWindowBase>());
             foreach (var window in windows)
             {

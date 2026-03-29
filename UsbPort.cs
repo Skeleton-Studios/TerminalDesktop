@@ -13,8 +13,6 @@ namespace TerminalDesktopMod
     public class UsbPort : NetworkBehaviour
     {
         public static UnityEvent<UsbPort> UsbPortChangeEvent = new UnityEvent<UsbPort>();
-        public NetworkObject parentTo;
-        public Vector3 OffsetFlash;
         public InteractTrigger triggerScript;
         public NetworkVariable<int> FlashInUsbIndex { get; set; } = new NetworkVariable<int>();
         public NetworkVariable<int> PortId { get; set; } = new NetworkVariable<int>();
@@ -24,18 +22,28 @@ namespace TerminalDesktopMod
             FlashDriveProp.FlashLoadedEvent.AddListener(LoadFlash);
         }
 
-        public override void OnNetworkSpawn()
+        public override void OnDestroy()
         {
+            base.OnDestroy();
+            FlashDriveProp.FlashLoadedEvent.RemoveListener(LoadFlash);
         }
         
         private void Start()
         {
             TerminalDesktopManager.Instance.UsbPorts.Add(this);
             var terminal = ReferencesStorage.Terminal;
-            transform.parent.parent = terminal.terminalUIScreen.transform.parent;
-            transform.parent.localRotation = Quaternion.Euler(0, 0, 0);
-            transform.parent.localPosition = Vector3.zero;
-            transform.parent.localScale = Vector3.one;
+            transform.SetParent(FindTerminalTransform(terminal.transform), false);
+            transform.localRotation = Quaternion.Euler(180, 0, 180);
+            transform.localPosition = new Vector3(-0.413f, -0.0728f, 0.7024f);
+        }
+
+        Transform FindTerminalTransform(Transform trans)
+        {
+            while(!trans.gameObject.TryGetComponent(out NetworkObject networkObject) && trans != null)
+            {
+                trans = trans.parent;
+            }
+            return trans;
         }
         
         protected virtual void FixedUpdate()
@@ -43,11 +51,6 @@ namespace TerminalDesktopMod
             if (GameNetworkManager.Instance is null || GameNetworkManager.Instance.localPlayerController is null)
                 return;
             triggerScript.interactable = IsHoldFlash();
-            if (FlashInUsb is null)
-                return;
-            Vector3 vector3 = transform.localPosition + OffsetFlash;
-            FlashInUsb.targetFloorPosition = vector3;
-            FlashInUsb.transform.localPosition = vector3;
         }
         
         protected virtual bool IsHoldFlash()
@@ -65,9 +68,8 @@ namespace TerminalDesktopMod
         {
             if (!playerWhoTriggered.isHoldingObject || playerWhoTriggered.currentlyHeldObjectServer is null)
                 return;
-            Vector3 vector3 = transform.localPosition + OffsetFlash;
             var flash = playerWhoTriggered.currentlyHeldObjectServer;
-            playerWhoTriggered.DiscardHeldObject(true, parentTo, vector3, true);
+            playerWhoTriggered.DiscardHeldObject(placeObject: true, GetComponent<NetworkObject>());
             InsertIntoUsbServerRpc(flash);
         }
         [ServerRpc(RequireOwnership = false)]
@@ -108,14 +110,24 @@ namespace TerminalDesktopMod
         public virtual void LoadFlash(FlashDriveProp flashDriveProp)
         {
             if (flashDriveProp.FlashIndex != FlashInUsbIndex.Value)
+            {
                 return;
+            }
             FlashDriveProp.FlashLoadedEvent.RemoveListener(LoadFlash);
 
+            Main.Log.LogInfo($"Init flash in usb with index {flashDriveProp.FlashIndex}");
+            InitLoadedFlash(flashDriveProp);
+        }
+
+        private void InitLoadedFlash(FlashDriveProp flashDriveProp)
+        {
             flashDriveProp.reachedFloorTarget = true;
             flashDriveProp.fallTime = 1;
-            flashDriveProp.transform.parent = transform.parent;
+            flashDriveProp.transform.SetParent(transform, worldPositionStays: true);
+            flashDriveProp.transform.localPosition = Vector3.zero;
             flashDriveProp.transform.localRotation = Quaternion.Euler(0, 0, 180);
             flashDriveProp.hasHitGround = true;
+            flashDriveProp.parentObject = transform;
 
             FlashInUsb = flashDriveProp;
             flashDriveProp.UsbPort = this;

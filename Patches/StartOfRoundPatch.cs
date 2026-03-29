@@ -37,8 +37,6 @@ namespace TerminalDesktopMod
         public static void Start(ref StartOfRound __instance)
         {
             WalkieTalkie.allWalkieTalkies.Clear();
-            FlashDriveProp.FlashLoadedEvent = new UnityEvent<FlashDriveProp>();
-            UsbPort.UsbPortChangeEvent = new UnityEvent<UsbPort>();
             DesktopStorage.ClearTerminalNodeEvent();            
 
             if (!__instance.IsServer)
@@ -60,7 +58,7 @@ namespace TerminalDesktopMod
             var usbPort = GameObject.Instantiate(DesktopStorage.UsbFlashPort);
             var usbPortObj = usbPort.GetComponent<NetworkObject>();
             usbPortObj.Spawn();
-            usbPortObj.GetComponentInChildren<UsbPort>().LoadPortById(1);
+            usbPortObj.GetComponent<UsbPort>().LoadPortById(1);
         }
     }
 }

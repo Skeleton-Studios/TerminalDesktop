@@ -1,5 +1,6 @@
-﻿using System;
+﻿using Dissonance;
 using Newtonsoft.Json;
+using System;
 using Unity.Netcode;
 using UnityEngine.Events;
 using Random = UnityEngine.Random;
@@ -28,12 +29,6 @@ namespace TerminalDesktopMod
             private set => _flashIndex = value;
         }
         public NetworkVariable<int> DecodeLevel { get; set; } = new NetworkVariable<int>();
-        private ScanNodeProperties ScanNodeProperties { get; set; }
-
-        private void Awake()
-        {
-            ScanNodeProperties = GetComponentInChildren<ScanNodeProperties>();
-        }
 
         public override int GetItemDataToSave()
         {
@@ -79,12 +74,6 @@ namespace TerminalDesktopMod
             DecodeLevel.Value = saveModel.DecodeLevel;
         }
 
-        public virtual void UpdateScrapValue(int value)
-        {
-            scrapValue += value;
-            ScanNodeProperties.scrapValue = scrapValue;
-            ScanNodeProperties.subText = $"Value: {scrapValue}";
-        }
         public virtual void UpdateDecodeLevel(int value)
         {
             if (IsServer)
@@ -98,6 +87,29 @@ namespace TerminalDesktopMod
                 return;
             UsbPort.PulledFlash();
             UsbPort = null;
+        }
+
+        public override void OnPlaceObject()
+        {
+            base.OnPlaceObject();
+
+            if (transform.parent == null || !transform.parent.TryGetComponent(out NetworkObject possibleUsbPort))
+            {
+                Main.Log.LogInfo("Flash drive placed, but not in a USB port. Ignoring.");
+                return;
+            }
+
+            UsbPort port = possibleUsbPort.GetComponent<UsbPort>();
+
+            if (port != null)
+            {
+                // To avoid the rotation changing due to dropped item logic in base LC, we set the
+                // parentObject here to be the USB port.
+                // This will get cleared by the base LC code when the Flash drive is picked up.
+                Main.Log.LogInfo("Flash drive placed in USB port, setting parent object to USB port transform.");
+                parentObject = possibleUsbPort.transform;
+                PlayDropSFX();
+            }
         }
     }
 }

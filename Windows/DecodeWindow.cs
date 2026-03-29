@@ -26,6 +26,11 @@ namespace TerminalDesktopMod
             UsbPort.UsbPortChangeEvent.AddListener(UsbPortChanged);
         }
 
+        protected virtual void OnDestroy()
+        {
+            UsbPort.UsbPortChangeEvent.RemoveListener(UsbPortChanged);
+        }
+
         public virtual void FixedUpdate()
         {
             if (!TimeOfDay.Instance.currentDayTimeStarted)
@@ -139,7 +144,7 @@ namespace TerminalDesktopMod
                 CurrentTimeToDecode = windowSync.CustomFloat;
             if (windowSync.SyncCustomInt)
             {
-                UseUsbPort.FlashInUsb.UpdateScrapValue(50);
+                UseUsbPort.FlashInUsb.SetScrapValue(50);
                 UseUsbPort.FlashInUsb.UpdateDecodeLevel(DecodeLevel);
                 EndDecode();
             }

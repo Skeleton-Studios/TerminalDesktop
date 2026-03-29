@@ -95,15 +95,8 @@
         <Exec Command="netcode-patch -nv 1.5.2 &quot;$(TargetPath)&quot; @(ReferencePathWithRefAssemblies->'&quot;%(Identity)&quot;', ' ')"/>
     </Target>
 
-<<<<<<< HEAD
-    <Target Condition="Exists('$(UnityPluginsDirectory)')" Name="CopyToUnity" DependsOnTargets="NetcodePatch" AfterTargets="PostBuildEvent">
-        <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(UnityPluginsDirectory)TerminalDesktop"/>
-    </Target>
-
-=======
     <!-- After build, copy assembly to Unity project for testing if running as submodule of Unity project -->
     <Target Condition="Exists('$(UnityPluginsDirectory)')" Name="CopyToUnity" DependsOnTargets="NetcodePatch" AfterTargets="PostBuildEvent">
         <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(UnityPluginsDirectory)TerminalDesktop"/>
     </Target>
->>>>>>> 771522b4f013652f41bfe09ebafb55c0d9e6a6c8
 </Project>

@@ -17,7 +17,7 @@ namespace TerminalDesktopMod
     {
         public const string ModGUID = "ss.desktop.terminal";
         public const string ModName = "Terminal Desktop";
-        public const string ModVersion = "1.0.1";
+        public const string ModVersion = "1.1.0";
         internal static ManualLogSource Log;
         private readonly Harmony harmony = new Harmony(ModGUID);
         private AssetBundle bundle;

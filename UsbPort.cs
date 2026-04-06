@@ -13,7 +13,8 @@ namespace TerminalDesktopMod
     public class UsbPort : NetworkBehaviour
     {
         public static UnityEvent<UsbPort> UsbPortChangeEvent = new UnityEvent<UsbPort>();
-        public InteractTrigger triggerScript;
+        [SerializeField]
+        private InteractTrigger triggerScript;
         public NetworkVariable<int> FlashInUsbIndex { get; set; } = new NetworkVariable<int>();
         public NetworkVariable<int> PortId { get; set; } = new NetworkVariable<int>();
         public FlashDriveProp FlashInUsb { get; set; }

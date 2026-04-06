@@ -5,19 +5,19 @@ namespace TerminalDesktopMod
     [HarmonyPatch(typeof(Terminal))]
     public static partial class TerminalPatch
     {
-        [HarmonyPatch("Awake")]
+        [HarmonyPatch(nameof(Terminal.Awake))]
         [HarmonyPrefix]
         public static void Awake(ref Terminal __instance)
         {
             ReferencesStorage.Terminal = __instance;
         }
-        [HarmonyPatch("LoadNewNode")]
+        [HarmonyPatch(nameof(Terminal.LoadNewNode))]
         [HarmonyPrefix]
-        public static void LoadNewNode(ref Terminal __instance,ref TerminalNode node)
+        public static void LoadNewNode(ref Terminal __instance, ref TerminalNode node)
         {
             DesktopStorage.InvokeChangeTerminalNode(__instance, node);
         }
-        [HarmonyPatch("RotateShipDecorSelection")]
+        [HarmonyPatch(nameof(Terminal.RotateShipDecorSelection))]
         [HarmonyPostfix]
         public static void RotateShipDecorSelection(ref Terminal __instance)
         {

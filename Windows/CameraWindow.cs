@@ -135,11 +135,11 @@ namespace TerminalDesktopMod
             baseNightLight.enabled = false;
             
             MapCamera = cameraObj.GetComponent<Camera>();
-            MapCamera.nearClipPlane = -2.47f;
             var terminal = ReferencesStorage.Terminal;
             CameraTexture = new RenderTexture((int)(terminal.playerScreenTex.width * 0.7f), (int)(terminal.playerScreenTex.height * 0.7f),
                 1, GraphicsFormat.R8G8B8A8_UNorm);
             MapCamera.targetTexture = CameraTexture;
+            MapCamera.enabled = true;
         }
 
         public override void WindowSync(WindowSync windowSync)

@@ -12,7 +12,7 @@ namespace TerminalDesktopMod
     [HarmonyPatch(typeof(StartOfRound))]
     public static partial class StartOfRoundPatch
     {
-        [HarmonyPatch("Awake")]
+        [HarmonyPatch(nameof(StartOfRound.Awake))]
         [HarmonyPrefix]
         public static void Awake(ref StartOfRound __instance)
         {
@@ -21,18 +21,14 @@ namespace TerminalDesktopMod
                 foreach (var level in __instance.levels)
                 {
                     if (level.spawnableScrap.Count(x => x.spawnableItem == scrap) == 0)
-                        level.spawnableScrap.Add(new SpawnableItemWithRarity()
-                        {
-                            spawnableItem = scrap,
-                            rarity = 70
-                        });
+                        level.spawnableScrap.Add(new SpawnableItemWithRarity(scrap, 70));
                 }
                 
                 if (!__instance.allItemsList.itemsList.Contains(scrap))
                     __instance.allItemsList.itemsList.Add(scrap);
             }
         }
-        [HarmonyPatch("Start")]
+        [HarmonyPatch(nameof(StartOfRound.Start))]
         [HarmonyPrefix]
         public static void Start(ref StartOfRound __instance)
         {

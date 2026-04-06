@@ -8,7 +8,7 @@ namespace TerminalDesktopMod
     public static partial class DeleteButtonPatch
     {
         [HarmonyPostfix]
-        [HarmonyPatch("DeleteFile")]
+        [HarmonyPatch(nameof(DeleteFileButton.DeleteFile))]
         private static void DeleteFile(DeleteFileButton __instance)
         {
             string filePath = Path.Combine(Application.persistentDataPath, $"TD_{__instance.fileToDelete}.json");

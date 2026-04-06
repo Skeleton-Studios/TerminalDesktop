@@ -5,7 +5,7 @@ namespace TerminalDesktopMod
     [HarmonyPatch(typeof(WalkieTalkie))]
     public static partial class WalkiePatch
     {
-        [HarmonyPatch("OnDisable")]
+        [HarmonyPatch(nameof(WalkieTalkie.OnDisable))]
         [HarmonyPrefix]
         public static bool OnDisable(ref WalkieTalkie __instance)
         {

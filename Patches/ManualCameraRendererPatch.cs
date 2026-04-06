@@ -6,7 +6,7 @@ namespace TerminalDesktopMod
     [HarmonyPatch(typeof(ManualCameraRenderer))]
     public static partial class ManualCameraRendererPatch
     {
-        [HarmonyPatch("Awake")]
+        [HarmonyPatch(nameof(ManualCameraRenderer.Awake))]
         [HarmonyPostfix]
         public static void Start(ref ManualCameraRenderer __instance)
         {
